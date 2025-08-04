@@ -39,7 +39,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <ResponsiveHeader title="Ana Panel" userEmail={user.email} userName={userDetails?.name}>
+      <ResponsiveHeader title="Personel Paneli" userEmail={user.email} userName={userDetails?.name}>
         {isAdmin && (
           <Link href="/admin">
             <Button
@@ -57,7 +57,7 @@ export default async function Dashboard() {
       <main className="flex-1 max-w-5xl mx-auto w-full p-4 sm:p-6">
         <div className="grid gap-4 sm:gap-6">
           <div className="bg-card border rounded-lg p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4">Ana Panel</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Personel Paneli</h2>
             <p className="text-muted-foreground mb-6">
               İstasyon yönetim sistemine hoş geldiniz.
             </p>

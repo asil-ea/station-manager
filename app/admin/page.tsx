@@ -50,7 +50,7 @@ export default async function AdminPage() {
       <ResponsiveHeader
         title="Admin Panel"
         backHref="/staff"
-        backText="Ana Panel"
+        backText="Personel Paneli"
         userEmail={user.email}
         userName={userDetails?.name}
         maxWidth="max-w-6xl"

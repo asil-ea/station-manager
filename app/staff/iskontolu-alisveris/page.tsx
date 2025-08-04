@@ -25,7 +25,7 @@ export default async function IskontoListesi() {
       <ResponsiveHeader
         title="İskontolu Alışveriş"
         backHref="/staff"
-        backText="Ana Panel'e Dön"
+        backText="Geri Dön"
         userEmail={user.email}
         userName={userDetails?.name}
       />

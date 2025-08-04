@@ -37,12 +37,21 @@ CREATE TABLE public.temizlik_gunluk (
   CONSTRAINT temizlik_gunluk_pkey PRIMARY KEY (id),
   CONSTRAINT temizlik_gunluk_personel_fkey FOREIGN KEY (personel) REFERENCES auth.users(id)
 );
+CREATE TABLE public.temizlik_gunluk_foto (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  gunluk_id bigint NOT NULL,
+  foto text NOT NULL,
+  meta_timestamp timestamp with time zone NOT NULL,
+  CONSTRAINT temizlik_gunluk_foto_pkey PRIMARY KEY (id),
+  CONSTRAINT temizlik_gunluk_foto_gunluk_id_fkey FOREIGN KEY (gunluk_id) REFERENCES public.temizlik_gunluk(id)
+);
 CREATE TABLE public.temizlik_gunluk_islem (
   gunluk_id bigint NOT NULL,
   islem_id bigint NOT NULL,
   CONSTRAINT temizlik_gunluk_islem_pkey PRIMARY KEY (gunluk_id, islem_id),
-  CONSTRAINT temizlik_gunluk_islem_gunluk_id_fkey FOREIGN KEY (gunluk_id) REFERENCES public.temizlik_gunluk(id),
-  CONSTRAINT temizlik_gunluk_islem_islem_id_fkey FOREIGN KEY (islem_id) REFERENCES public.temizlik_islem(id)
+  CONSTRAINT temizlik_gunluk_islem_islem_id_fkey FOREIGN KEY (islem_id) REFERENCES public.temizlik_islem(id),
+  CONSTRAINT temizlik_gunluk_islem_gunluk_id_fkey FOREIGN KEY (gunluk_id) REFERENCES public.temizlik_gunluk(id)
 );
 CREATE TABLE public.temizlik_islem (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
