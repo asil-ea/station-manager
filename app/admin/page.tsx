@@ -36,7 +36,7 @@ export default async function AdminPage() {
 
   // Get user count
   const { count: userCount } = await supabase
-    .from("auth.users")
+    .from("user_details")
     .select("*", { count: "exact", head: true });
 
   // Get admin count
@@ -122,7 +122,7 @@ export default async function AdminPage() {
                     className="h-16 sm:h-20 flex flex-col gap-2 w-full"
                   >
                     <Car className="h-5 w-5 sm:h-6 sm:w-6" />
-                    <span className="text-sm sm:text-base">Plaka Yönetimi</span>
+                    <span className="text-sm sm:text-base">Plaka & İskonto Yönetimi</span>
                   </Button>
                 </Link>
 
@@ -132,7 +132,7 @@ export default async function AdminPage() {
                     className="h-16 sm:h-20 flex flex-col gap-2 w-full"
                   >
                     <Receipt className="h-5 w-5 sm:h-6 sm:w-6" />
-                    <span className="text-sm sm:text-base">İşlem Geçmişi</span>
+                    <span className="text-sm sm:text-base">İskontolu İşlem Geçmişi</span>
                   </Button>
                 </Link>
 
