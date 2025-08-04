@@ -12,14 +12,14 @@ export default async function PlateManagementPage() {
   }
 
   // Check if user is admin
-  const { data: userRole } = await supabase
+  const { data: userDetails } = await supabase
     .from('user_details')
-    .select('role')
+    .select('role, name')
     .eq('uid', user.id)
     .single();
 
-  if (userRole?.role !== 'admin') {
-    redirect("/dashboard");
+  if (userDetails?.role !== 'admin') {
+    redirect("/staff");
   }
 
   return (
@@ -29,6 +29,7 @@ export default async function PlateManagementPage() {
         backHref="/admin"
         backText="Admin Panel"
         userEmail={user.email}
+        userName={userDetails?.name}
         maxWidth="max-w-7xl"
       />
       

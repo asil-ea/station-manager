@@ -13,15 +13,15 @@ export default async function CreateUserPage() {
     redirect("/auth/login");
   }
 
-  // Check if user is admin
-  const { data: userRole } = await supabase
+  // Check if user is admin and get user details
+  const { data: userDetails } = await supabase
     .from('user_details')
-    .select('role')
+    .select('role, name')
     .eq('uid', user.id)
     .single();
 
-  if (userRole?.role !== 'admin') {
-    redirect("/dashboard");
+  if (userDetails?.role !== 'admin') {
+    redirect("/staff");
   }
 
   return (
@@ -31,6 +31,7 @@ export default async function CreateUserPage() {
         backHref="/admin"
         backText="Admin Panel"
         userEmail={user.email}
+        userName={userDetails?.name}
         maxWidth="max-w-4xl"
       >
         <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />

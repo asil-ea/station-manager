@@ -23,15 +23,15 @@ export default async function AdminPage() {
     redirect("/auth/login");
   }
 
-  // Check if user is admin
-  const { data: userRole } = await supabase
+  // Check if user is admin and get user details
+  const { data: userDetails } = await supabase
     .from("user_details")
-    .select("role")
+    .select("role, name")
     .eq("uid", user.id)
     .single();
 
-  if (userRole?.role !== "admin") {
-    redirect("/dashboard");
+  if (userDetails?.role !== "admin") {
+    redirect("/staff");
   }
 
   // Get user count
@@ -49,9 +49,10 @@ export default async function AdminPage() {
     <>
       <ResponsiveHeader
         title="Admin Panel"
-        backHref="/dashboard"
+        backHref="/staff"
         backText="Ana Panel"
         userEmail={user.email}
+        userName={userDetails?.name}
         maxWidth="max-w-6xl"
       >
         <Shield className="h-5 w-5 sm:h-6 sm:w-6" />

@@ -11,6 +11,7 @@ interface ResponsiveHeaderProps {
   backHref?: string;
   backText?: string;
   userEmail?: string;
+  userName?: string;
   children?: ReactNode;
   maxWidth?: string;
 }
@@ -20,23 +21,11 @@ export function ResponsiveHeader({
   backHref,
   backText = "Geri",
   userEmail,
+  userName,
   children,
   maxWidth = "max-w-5xl",
 }: ResponsiveHeaderProps) {
 
-  const headerActions = (
-    <div className="flex items-center gap-4">
-      <span className="text-sm text-muted-foreground hidden sm:block">
-        {userEmail}
-        <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
-          Admin
-        </span>
-      </span>
-      <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded sm:hidden">
-        Admin
-      </span>
-    </div>
-  );
   return (
     <header className="border-b border-b-foreground/10">
       <div className={`${maxWidth} mx-auto p-4`}>
@@ -66,9 +55,11 @@ export function ResponsiveHeader({
             {children}
           </div>
 
-          {userEmail && (
+          {(userEmail || userName) && (
             <div className="text-xs text-muted-foreground truncate">
-              {userEmail}
+              {userName && <span className="font-medium">{userName}</span>}
+              {userName && userEmail && <span className="mx-1">•</span>}
+              {userEmail && <span>{userEmail}</span>}
             </div>
           )}
         </div>
@@ -78,22 +69,29 @@ export function ResponsiveHeader({
           <div className="flex items-center gap-4">
             {backHref && (
               <Link href={backHref}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  {backText}
-                </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {backText}
+          </Button>
               </Link>
             )}
             <h1 className="text-2xl font-bold">{title}</h1>
             {children}
           </div>
-
+          
           <div className="flex items-center gap-4">
-            {<LogoutButton />}
+            {(userEmail || userName) && (
+              <div className="text-sm text-muted-foreground truncate text-right">
+          {userName && <span className="font-medium">{userName}</span>}
+          {userName && userEmail && <span className="mx-1">•</span>}
+          {userEmail && <span>{userEmail}</span>}
+              </div>
+            )}
+            <LogoutButton />
           </div>
         </div>
       </div>
