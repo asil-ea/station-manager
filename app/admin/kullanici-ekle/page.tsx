@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ResponsiveHeader } from "@/components/responsive-header";
+import { ResponsiveHeader } from "@/components/common/responsive-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus } from "lucide-react";
-import { CreateUserForm } from "@/components/create-user-form";
+import { CreateUserForm } from "@/components/admin/kullanıcı-yonetim/create-user-form";
 
 export default async function CreateUserPage() {
   const supabase = await createClient();

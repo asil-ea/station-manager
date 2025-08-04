@@ -281,10 +281,10 @@ export function PlateManagement() {
                   max="100"
                   step="0.1"
                   placeholder="ör: 5.5"
-                  value={newPlateData.oran || ''}
+                  value={newPlateData.oran === 0 ? '0' : newPlateData.oran || ''}
                   onChange={(e) => setNewPlateData(prev => ({ 
                     ...prev, 
-                    oran: parseFloat(e.target.value) || 0 
+                    oran: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 
                   }))}
                   required
                 />
@@ -426,10 +426,10 @@ export function PlateManagement() {
                               min="0"
                               max="100"
                               step="0.1"
-                              value={editingPlate.oran || ''}
+                              value={editingPlate.oran === 0 ? '0' : editingPlate.oran || ''}
                               onChange={(e) => setEditingPlate(prev => prev ? ({ 
                                 ...prev, 
-                                oran: parseFloat(e.target.value) || 0 
+                                oran: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 
                               }) : null)}
                             />
                           </div>

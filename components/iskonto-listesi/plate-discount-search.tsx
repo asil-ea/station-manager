@@ -18,7 +18,7 @@ interface DiscountResult {
 }
 
 interface TransactionData {
-  gasType: 'Motorin' | 'Benzin';
+  gasType: 'Motorin' | 'Benzin' | 'LPG';
   liters: number;
   pricePerLiter: number;
   totalPriceBeforeDiscount: number;
@@ -467,22 +467,29 @@ export function PlateDiscountSearch() {
               {/* Gas Type Selection */}
               <div>
                 <label className="text-sm font-medium mb-2 block">Yakıt Türü</label>
-                <div className="flex gap-2">
-                  <Button
-                    variant={transaction.gasType === 'Motorin' ? 'default' : 'outline'}
-                    onClick={() => handleTransactionChange('gasType', 'Motorin')}
-                    className="flex-1"
-                  >
-                    Motorin
-                  </Button>
-                  <Button
-                    variant={transaction.gasType === 'Benzin' ? 'default' : 'outline'}
-                    onClick={() => handleTransactionChange('gasType', 'Benzin')}
-                    className="flex-1"
-                  >
-                    Benzin
-                  </Button>
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={transaction.gasType === 'Motorin' ? 'default' : 'outline'}
+                  onClick={() => handleTransactionChange('gasType', 'Motorin')}
+                  className="flex-1"
+                >
+                  Motorin
+                </Button>
+                <Button
+                  variant={transaction.gasType === 'Benzin' ? 'default' : 'outline'}
+                  onClick={() => handleTransactionChange('gasType', 'Benzin')}
+                  className="flex-1"
+                >
+                  Benzin
+                </Button>
+                <Button
+                  variant={transaction.gasType === 'LPG' ? 'default' : 'outline'}
+                  onClick={() => handleTransactionChange('gasType', 'LPG')}
+                  className="flex-1"
+                >
+                  LPG
+                </Button>
+              </div>
               </div>
 
               {/* Liters Input */}

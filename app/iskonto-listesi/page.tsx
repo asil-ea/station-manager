@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ResponsiveHeader } from "@/components/responsive-header";
+import { ResponsiveHeader } from "@/components/common/responsive-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlateDiscountSearch } from "@/components/plate-discount-search";
+import { PlateDiscountSearch } from "@/components/iskonto-listesi/plate-discount-search";
 
 export default async function IskontoListesi() {
   const supabase = await createClient();

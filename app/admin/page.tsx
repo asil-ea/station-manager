@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Users, BarChart3, Shield, Car, Receipt, UserPlus } from "lucide-react";
-import { ResponsiveHeader } from "@/components/responsive-header";
+import { ResponsiveHeader } from "@/components/common/responsive-header";
 
 export default async function AdminPage() {
   const supabase = await createClient();

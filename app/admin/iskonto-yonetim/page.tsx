@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ResponsiveHeader } from "@/components/responsive-header";
-import { PlateManagement } from "@/components/plate-management";
+import { ResponsiveHeader } from "@/components/common/responsive-header";
+import { PlateManagement } from "@/components/admin/iskonto-yonetim/plate-management";
 
 export default async function PlateManagementPage() {
   const supabase = await createClient();

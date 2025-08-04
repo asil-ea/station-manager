@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ResponsiveHeader } from "@/components/responsive-header";
+import { ResponsiveHeader } from "@/components/common/responsive-header";
 import { Receipt } from "lucide-react";
-import { TransactionsTable } from "@/components/transactions-table";
+import { TransactionsTable } from "@/components/admin/iskonto-gecmisi/transactions-table";
 
 export default async function TransactionsPage() {
   const supabase = await createClient();

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ResponsiveHeader } from "@/components/responsive-header";
+import { ResponsiveHeader } from "@/components/common/responsive-header";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
