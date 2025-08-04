@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -65,9 +64,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Giriş yap</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Hesabınıza giriş yapmak için e-posta adresinizi girin
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -90,7 +89,7 @@ export function LoginForm({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Şifre</Label>
                 <Input
                   id="password"
                   type="password"
@@ -101,7 +100,7 @@ export function LoginForm({
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? "Giriş yapılıyor..." : "Giriş yap"}
               </Button>
             </div>
           </form>

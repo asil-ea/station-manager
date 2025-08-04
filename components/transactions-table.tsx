@@ -23,6 +23,9 @@ interface Transaction {
   iskonto_listesi: {
     plaka: string;
   };
+  user_details: {
+    name: string;
+  } | null;
 }
 
 interface FilterState {
@@ -54,7 +57,8 @@ export function TransactionsTable() {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
+      // First, fetch transactions
+      const { data: transactionsData, error: transactionsError } = await supabase
         .from('iskonto_alisveris')
         .select(`
           *,
@@ -64,12 +68,34 @@ export function TransactionsTable() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        throw new Error("İşlemler yüklenirken hata oluştu: " + error.message);
+      if (transactionsError) {
+        throw new Error("İşlemler yüklenirken hata oluştu: " + transactionsError.message);
       }
 
-      setTransactions(data || []);
-      setFilteredTransactions(data || []);
+      // Get unique personnel UUIDs
+      const personnelUuids = [...new Set(transactionsData?.map(t => t.personel) || [])];
+      
+      // Fetch user details for all personnel
+      const { data: userDetailsData, error: userDetailsError } = await supabase
+        .from('user_details')
+        .select('uid, name')
+        .in('uid', personnelUuids);
+
+      if (userDetailsError) {
+        throw new Error("Personel bilgileri yüklenirken hata oluştu: " + userDetailsError.message);
+      }
+
+      // Create a map for quick lookup
+      const userDetailsMap = new Map(userDetailsData?.map(ud => [ud.uid, ud]) || []);
+
+      // Merge the data
+      const enrichedTransactions = transactionsData?.map(transaction => ({
+        ...transaction,
+        user_details: userDetailsMap.get(transaction.personel) || null
+      })) || [];
+
+      setTransactions(enrichedTransactions);
+      setFilteredTransactions(enrichedTransactions);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu");
     } finally {
@@ -94,10 +120,10 @@ export function TransactionsTable() {
       );
     }
 
-    // Filter by personnel (UUID for now)
+    // Filter by personnel (name for now)
     if (filters.personel.trim()) {
       filtered = filtered.filter(t => 
-        t.personel?.toLowerCase().includes(filters.personel.toLowerCase())
+        t.user_details?.name?.toLowerCase().includes(filters.personel.toLowerCase())
       );
     }
 
@@ -333,7 +359,7 @@ export function TransactionsTable() {
                         {formatCurrency(transaction.net_tutar)}
                       </td>
                       <td className="p-2 text-sm">
-                        {transaction.personel || 'N/A'}
+                        {transaction.user_details?.name || 'N/A'}
                       </td>
                     </tr>
                   ))}

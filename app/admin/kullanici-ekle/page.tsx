@@ -1,10 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { LogoutButton } from "@/components/logout-button";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { ResponsiveHeader } from "@/components/responsive-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { CreateUserForm } from "@/components/create-user-form";
 
 export default async function CreateUserPage() {
@@ -28,37 +26,23 @@ export default async function CreateUserPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-b-foreground/10">
-        <div className="max-w-4xl mx-auto flex justify-between items-center p-4">
-          <div className="flex items-center gap-4">
-            <Link href="/admin">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Admin Panel
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <UserPlus className="h-6 w-6" />
-              Yeni Kullanıcı Ekle
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {user.email}
-              <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">Admin</span>
-            </span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <ResponsiveHeader
+        title="Kullanıcı Ekle"
+        backHref="/admin"
+        backText="Admin Panel"
+        userEmail={user.email}
+        maxWidth="max-w-4xl"
+      >
+        <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />
+      </ResponsiveHeader>
       
-      <main className="flex-1 max-w-4xl mx-auto w-full p-6">
+      <main className="flex-1 max-w-4xl mx-auto w-full p-4 sm:p-6">
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardHeader>
               <CardTitle>Yeni Kullanıcı Oluştur</CardTitle>
               <CardDescription>
-                Sisteme yeni bir kullanıcı ekleyin ve rolünü belirleyin
+                Sisteme yeni bir kullanıcı ekleyin ve rolünü belirleyin.
               </CardDescription>
             </CardHeader>
             <CardContent>

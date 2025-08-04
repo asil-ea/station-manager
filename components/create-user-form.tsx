@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Save, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -21,13 +21,13 @@ interface UserData {
 export function CreateUserForm() {
   const router = useRouter();
   const [formData, setFormData] = useState<UserData>({
-    email: '',
-    password: '',
-    name: '',
-    role: 'user',
-    tel: ''
+    email: "",
+    password: "",
+    name: "",
+    role: "user",
+    tel: "",
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -35,12 +35,13 @@ export function CreateUserForm() {
 
   const generatePassword = () => {
     const length = 12;
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
     let password = "";
     for (let i = 0; i < length; i++) {
       password += charset.charAt(Math.floor(Math.random() * charset.length));
     }
-    setFormData(prev => ({ ...prev, password }));
+    setFormData((prev) => ({ ...prev, password }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,7 +54,7 @@ export function CreateUserForm() {
       if (!formData.email.trim()) {
         throw new Error("E-posta adresi zorunludur");
       }
-      
+
       if (!formData.password.trim() || formData.password.length < 8) {
         throw new Error("Şifre en az 8 karakter olmalıdır");
       }
@@ -69,8 +70,8 @@ export function CreateUserForm() {
         email: formData.email.trim(),
         password: formData.password,
         options: {
-          emailRedirectTo: undefined // Don't send confirmation email
-        }
+          emailRedirectTo: undefined, // Don't send confirmation email
+        },
       });
 
       if (authError) {
@@ -83,35 +84,38 @@ export function CreateUserForm() {
 
       // Add user details (including role)
       const { error: detailsError } = await supabase
-        .from('user_details')
+        .from("user_details")
         .insert({
           uid: authData.user.id,
           name: formData.name.trim(),
           role: formData.role,
-          tel: formData.tel.trim() || null
+          tel: formData.tel.trim() || null,
         });
 
       if (detailsError) {
-        throw new Error("Kullanıcı detayları eklenirken hata: " + detailsError.message);
+        throw new Error(
+          "Kullanıcı detayları eklenirken hata: " + detailsError.message
+        );
       }
 
       setSuccess(true);
-      
+
       // Reset form after 3 seconds and redirect
       setTimeout(() => {
         setFormData({
-          email: '',
-          password: '',
-          name: '',
-          role: 'user',
-          tel: ''
+          email: "",
+          password: "",
+          name: "",
+          role: "user",
+          tel: "",
         });
         setSuccess(false);
-        router.push('/admin');
+        router.push("/admin");
       }, 3000);
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu");
+      setError(
+        err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -122,15 +126,24 @@ export function CreateUserForm() {
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-8">
           <CheckCircle className="h-12 w-12 text-green-600 mb-4" />
-          <h3 className="text-lg font-semibold text-green-600 mb-2">Başarılı!</h3>
+          <h3 className="text-lg font-semibold text-green-600 mb-2">
+            Başarılı!
+          </h3>
           <p className="text-muted-foreground text-center mb-4">
-            Kullanıcı başarıyla oluşturuldu. Admin paneline yönlendiriliyorsunuz...
+            Kullanıcı başarıyla oluşturuldu. Admin paneline
+            yönlendiriliyorsunuz...
           </p>
           <div className="bg-secondary/20 p-4 rounded-md w-full">
             <h4 className="font-semibold mb-2">Kullanıcı Bilgileri:</h4>
-            <p><strong>E-posta:</strong> {formData.email}</p>
-            <p><strong>Şifre:</strong> {formData.password}</p>
-            <p><strong>Rol:</strong> {formData.role}</p>
+            <p>
+              <strong>E-posta:</strong> {formData.email}
+            </p>
+            <p>
+              <strong>Şifre:</strong> {formData.password}
+            </p>
+            <p>
+              <strong>Rol:</strong> {formData.role}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -153,7 +166,9 @@ export function CreateUserForm() {
           type="email"
           placeholder="kullanici@example.com"
           value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, email: e.target.value }))
+          }
           required
         />
       </div>
@@ -166,7 +181,9 @@ export function CreateUserForm() {
             type={showPassword ? "text" : "password"}
             placeholder="En az 8 karakter"
             value={formData.password}
-            onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, password: e.target.value }))
+            }
             className="pr-20"
             required
           />
@@ -178,7 +195,11 @@ export function CreateUserForm() {
               onClick={() => setShowPassword(!showPassword)}
               className="h-6 w-6 p-0"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
@@ -201,7 +222,9 @@ export function CreateUserForm() {
           type="text"
           placeholder="Kullanıcının tam adı"
           value={formData.name}
-          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, name: e.target.value }))
+          }
           required
         />
       </div>
@@ -211,23 +234,25 @@ export function CreateUserForm() {
         <div className="flex gap-2 flex-wrap">
           <Button
             type="button"
-            variant={formData.role === 'user' ? 'default' : 'outline'}
+            variant={formData.role === "user" ? "default" : "outline"}
             size="sm"
-            onClick={() => setFormData(prev => ({ ...prev, role: 'user' }))}
+            onClick={() => setFormData((prev) => ({ ...prev, role: "user" }))}
           >
             Kullanıcı
           </Button>
           <Button
             type="button"
-            variant={formData.role === 'admin' ? 'default' : 'outline'}
+            variant={formData.role === "admin" ? "default" : "outline"}
             size="sm"
-            onClick={() => setFormData(prev => ({ ...prev, role: 'admin' }))}
+            onClick={() => setFormData((prev) => ({ ...prev, role: "admin" }))}
           >
             Admin
           </Button>
         </div>
-        <Badge variant={formData.role === 'admin' ? 'destructive' : 'secondary'}>
-          Seçili: {formData.role === 'admin' ? 'Admin' : 'Kullanıcı'}
+        <Badge
+          variant={formData.role === "admin" ? "destructive" : "secondary"}
+        >
+          Seçili: {formData.role === "admin" ? "Admin" : "Kullanıcı"}
         </Badge>
       </div>
 
@@ -238,16 +263,14 @@ export function CreateUserForm() {
           type="tel"
           placeholder="5XX XXX XX XX"
           value={formData.tel}
-          onChange={(e) => setFormData(prev => ({ ...prev, tel: e.target.value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, tel: e.target.value }))
+          }
         />
       </div>
 
       <div className="flex gap-4 pt-4">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex-1"
-        >
+        <Button type="submit" disabled={isSubmitting} className="flex-1">
           {isSubmitting ? (
             "Oluşturuluyor..."
           ) : (
@@ -257,11 +280,11 @@ export function CreateUserForm() {
             </>
           )}
         </Button>
-        
+
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push('/admin')}
+          onClick={() => router.push("/admin")}
           disabled={isSubmitting}
         >
           İptal

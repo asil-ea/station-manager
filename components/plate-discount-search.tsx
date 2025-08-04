@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Percent, AlertCircle, CheckCircle, ShoppingCart, Calculator, Upload, Image as ImageIcon, FileText } from "lucide-react";
+import { Search, Percent, AlertCircle, CheckCircle, ShoppingCart, Calculator, Image as ImageIcon, FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface DiscountResult {
@@ -122,6 +122,7 @@ export function PlateDiscountSearch() {
     setIsUploadingPhoto(true);
     try {
       const fileName = generateFileName(result.plaka, transactionId, file);
+      //eslint-disable-next-line no-unused-vars
       const { data, error } = await supabase.storage
         .from('iskonto-fatura')
         .upload(fileName, file, {
