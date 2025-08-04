@@ -50,7 +50,7 @@ export async function updateSession(request: NextRequest) {
   // Redirect authenticated users from home page to dashboard
   if (request.nextUrl.pathname === "/" && user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/staff";
     return NextResponse.redirect(url);
   }
 
@@ -64,7 +64,7 @@ export async function updateSession(request: NextRequest) {
   // Redirect authenticated users away from auth pages to dashboard
   if (user && request.nextUrl.pathname.startsWith("/auth")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/staff";
     return NextResponse.redirect(url);
   }
 

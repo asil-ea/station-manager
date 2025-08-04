@@ -52,7 +52,7 @@ export function LoginForm({
       });
       if (error) throw error;
       // Redirect to dashboard after successful login
-      router.push("/dashboard");
+      router.push("/staff");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

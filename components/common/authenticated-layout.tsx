@@ -10,7 +10,6 @@ interface AuthenticatedLayoutProps {
   backText?: string;
   maxWidth?: string;
   headerChildren?: ReactNode;
-  headerActions?: ReactNode;
   requireAdmin?: boolean;
 }
 
@@ -21,7 +20,6 @@ export async function AuthenticatedLayout({
   backText,
   maxWidth = "max-w-5xl",
   headerChildren,
-  headerActions,
   requireAdmin = false
 }: AuthenticatedLayoutProps) {
   const supabase = await createClient();
@@ -31,16 +29,17 @@ export async function AuthenticatedLayout({
     redirect("/auth/login");
   }
 
+  // Fetch user details
+  const { data: userDetails } = await supabase
+    .from('user_details')
+    .select('role, name')
+    .eq('uid', user.id)
+    .single();
+
   // Check user role if admin is required
   if (requireAdmin) {
-    const { data: userRole } = await supabase
-      .from('user_details')
-      .select('role')
-      .eq('uid', user.id)
-      .single();
-
-    if (userRole?.role !== 'admin') {
-      redirect("/dashboard");
+    if (userDetails?.role !== 'admin') {
+      redirect("/staff");
     }
   }
 
@@ -51,6 +50,7 @@ export async function AuthenticatedLayout({
         backHref={backHref}
         backText={backText}
         userEmail={user.email}
+        userName={userDetails?.name}
         maxWidth={maxWidth}
       >
         {headerChildren}
