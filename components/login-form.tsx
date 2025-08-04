@@ -18,13 +18,27 @@ import { useState } from "react";
 
 export function LoginForm({
   className,
+  message,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<"div"> & { message?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const getMessageText = (msgCode?: string) => {
+    switch (msgCode) {
+      case 'signup_disabled':
+        return 'Yeni kullanıcı kaydı şu anda kapalıdır. Lütfen yöneticinizle iletişime geçin.';
+      case 'forgot_password_disabled':
+        return 'Şifre sıfırlama özelliği şu anda kapalıdır. Lütfen yöneticinizle iletişime geçin.';
+      case 'update_password_disabled':
+        return 'Şifre güncelleme özelliği şu anda kapalıdır. Lütfen yöneticinizle iletişime geçin.';
+      default:
+        return null;
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +71,11 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {message && getMessageText(message) && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-800">{getMessageText(message)}</p>
+            </div>
+          )}
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
@@ -71,15 +90,7 @@ export function LoginForm({
                 />
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -92,15 +103,6 @@ export function LoginForm({
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/auth/sign-up"
-                className="underline underline-offset-4"
-              >
-                Sign up
-              </Link>
             </div>
           </form>
         </CardContent>

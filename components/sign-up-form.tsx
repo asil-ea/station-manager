@@ -49,19 +49,21 @@ export function SignUpForm({
       });
       if (error) throw error;
 
-      // If user was created successfully, assign the "staff" role
+      // If user was created successfully, create user details with "user" role
       if (data.user?.id) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
+        const { error: detailsError } = await supabase
+          .from('user_details')
           .insert({
             uid: data.user.id,
-            role: 'staff'
+            name: '', // Empty name, to be filled later
+            role: 'user',
+            tel: null
           });
 
-        if (roleError) {
-          console.error('Error assigning role:', roleError);
+        if (detailsError) {
+          console.error('Error creating user details:', detailsError);
           // Note: We don't throw here to avoid breaking the sign-up flow
-          // The user is created but role assignment failed
+          // The user is created but details creation failed
         }
       }
 
