@@ -9,8 +9,8 @@ create table public.iskonto_alisveris (
   net_tutar double precision not null,
   litre_fiyat double precision not null,
   personel uuid not null,
-  fatura_foto_url text null,
   aciklama text null,
+  fatura_foto text null,
   constraint iskonto_alisveris_pkey primary key (id),
   constraint iskonto_alisveris_musteri_fkey foreign KEY (musteri) references iskonto_listesi (id),
   constraint iskonto_alisveris_personel_fkey foreign KEY (personel) references auth.users (id)

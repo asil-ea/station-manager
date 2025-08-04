@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Calendar, User, FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Filter, FileText, Image, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface Transaction {
@@ -20,6 +21,7 @@ interface Transaction {
   litre_fiyat: number;
   aciklama: string | null;
   personel: string;
+  fatura_foto: string | null;
   iskonto_listesi: {
     plaka: string;
   };
@@ -42,6 +44,8 @@ export function TransactionsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
   
   const [filters, setFilters] = useState<FilterState>({
     plaka: '',
@@ -169,6 +173,15 @@ export function TransactionsTable() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const handleImageClick = async (fileName: string) => {
+    const { data } = await supabase.storage
+      .from('iskonto-fatura')
+      .createSignedUrl(fileName, 60);
+    
+    setSelectedImage(data?.signedUrl || null);
+    setImageDialogOpen(true);
   };
 
   useEffect(() => {
@@ -323,6 +336,7 @@ export function TransactionsTable() {
                     <th className="text-right p-2">İskonto %</th>
                     <th className="text-right p-2">Net Tutar</th>
                     <th className="text-left p-2">Personel</th>
+                    <th className="text-center p-2">Fatura</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -361,6 +375,21 @@ export function TransactionsTable() {
                       <td className="p-2 text-sm">
                         {transaction.user_details?.name || 'N/A'}
                       </td>
+                      <td className="p-2 text-center">
+                        {transaction.fatura_foto ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleImageClick(transaction.fatura_foto!)}
+                            className="h-8 w-8 p-0"
+                            title="Fatura görüntüsünü aç"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">-</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -369,6 +398,34 @@ export function TransactionsTable() {
           )}
         </CardContent>
       </Card>
+
+      {/* Image Dialog */}
+      <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-2">
+            <DialogTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              Fatura Görüntüsü
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-6 pb-6">
+            {selectedImage && (
+              <div className="relative">
+                <img
+                  src={selectedImage}
+                  alt="Fatura"
+                  className="w-full h-auto max-h-[70vh] object-contain rounded-lg border"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==';
+                    target.alt = 'Görüntü yüklenemedi';
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -261,31 +261,31 @@ export function PlateDiscountSearch() {
       }
 
       // If transaction was successful and there's a photo, upload it
-      let photoUrl = null;
+      let fileName = null;
       if (transaction.receiptPhoto && transactionData) {
         setIsUploadingPhoto(true);
         const uploadResult = await handlePhotoUpload(transaction.receiptPhoto, transactionData.id);
         setIsUploadingPhoto(false);
         
         if (uploadResult) {
-          photoUrl = uploadResult.publicUrl;
+          fileName = uploadResult.fileName;
           
-          // Update the transaction record with the photo URL
+          // Update the transaction record with the photo filename
           const { error: updateError } = await supabase
             .from('iskonto_alisveris')
-            .update({ fatura_foto_url: photoUrl })
+            .update({ fatura_foto: fileName })
             .eq('id', transactionData.id);
 
           if (updateError) {
-            console.error('Photo URL update error:', updateError);
-            // Don't fail the transaction for photo URL update failure
+            console.error('Photo filename update error:', updateError);
+            // Don't fail the transaction for photo filename update failure
           }
         }
       }
 
       // Update local state to show photo was uploaded
-      if (photoUrl) {
-        setTransaction(prev => ({ ...prev, receiptPhotoUrl: photoUrl }));
+      if (fileName) {
+        setTransaction(prev => ({ ...prev, receiptPhotoUrl: fileName }));
       }
 
       setTransactionSuccess(true);

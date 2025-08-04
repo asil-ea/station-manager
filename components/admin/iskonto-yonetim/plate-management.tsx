@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Save, 
   CheckCircle, 
@@ -16,7 +17,6 @@ import {
   Search,
   Car,
   Percent,
-  Filter
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -52,6 +52,7 @@ export function PlateManagement() {
   const [editingPlate, setEditingPlate] = useState<ExistingPlate | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Loading and error states
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -162,6 +163,7 @@ export function PlateManagement() {
         aciklama: '',
         aktif: true
       });
+      setIsModalOpen(false); // Close modal after successful submission
       
       // Refresh the list
       await fetchPlates();
@@ -241,18 +243,25 @@ export function PlateManagement() {
         </div>
       )}
 
-      {/* Add New Plate Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
+      {/* Add New Plate Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogTrigger asChild>
+          <Button className="mb-6">
+            <Plus className="h-4 w-4 mr-2" />
             Yeni Plaka Ekle
-          </CardTitle>
-          <CardDescription>
-            Sisteme yeni bir plaka ekleyin ve iskonto oranını belirleyin.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Yeni Plaka Ekle
+            </DialogTitle>
+            <DialogDescription>
+              Sisteme yeni bir plaka ekleyin ve iskonto oranını belirleyin.
+            </DialogDescription>
+          </DialogHeader>
+          
           <form onSubmit={handleNewPlateSubmit} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -319,23 +328,32 @@ export function PlateManagement() {
               </Label>
             </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full md:w-auto"
-            >
-              {isSubmitting ? (
-                "Kaydediliyor..."
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Plaka Ekle
-                </>
-              )}
-            </Button>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsModalOpen(false)}
+                disabled={isSubmitting}
+              >
+                İptal
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  "Kaydediliyor..."
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Plaka Ekle
+                  </>
+                )}
+              </Button>
+            </div>
           </form>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
 
       {/* Existing Plates Management */}
       <Card>
