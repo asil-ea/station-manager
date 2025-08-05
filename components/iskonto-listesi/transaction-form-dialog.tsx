@@ -10,7 +10,8 @@ import { createClient } from "@/lib/supabase/client";
 interface DiscountResult {
   id: number;
   plaka: string;
-  oran: number;
+  oran_nakit: number;
+  oran_kredi: number;
   aciklama: string | null;
   aktif: boolean;
   created_at: string;
@@ -18,6 +19,7 @@ interface DiscountResult {
 
 interface TransactionData {
   gasType: 'Motorin' | 'Benzin' | 'LPG';
+  paymentMethod: 'nakit' | 'kredi';
   liters: number;
   pricePerLiter: number;
   totalPriceBeforeDiscount: number;
@@ -28,6 +30,7 @@ interface TransactionData {
 }
 
 interface TransactionFormDialogProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user: any; // User object from Supabase
   isOpen: boolean;
   onClose: () => void;
@@ -45,8 +48,15 @@ export function TransactionFormDialog({
   onError 
 }: TransactionFormDialogProps) {
   const supabase = createClient();
+  
+  // Get the current discount rate based on payment method
+  const getCurrentDiscountRate = () => {
+    return transaction.paymentMethod === 'nakit' ? result.oran_nakit : result.oran_kredi;
+  };
+  
   const [transaction, setTransaction] = useState<TransactionData>({
     gasType: 'Motorin',
+    paymentMethod: 'nakit',
     liters: 0,
     pricePerLiter: 0,
     totalPriceBeforeDiscount: 0,
@@ -73,8 +83,7 @@ export function TransactionFormDialog({
     setIsUploadingPhoto(true);
     try {
       const fileName = generateFileName(result.plaka, transactionId, file);
-      //eslint-disable-next-line no-unused-vars
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('iskonto-fatura')
         .upload(fileName, file, {
           cacheControl: '3600',
@@ -127,17 +136,21 @@ export function TransactionFormDialog({
     }));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleTransactionChange = (field: keyof TransactionData, value: any) => {
     const updatedTransaction = { ...transaction, [field]: value };
     
-    // Auto-calculate prices when liters or price per liter changes
-    if (field === 'liters' || field === 'pricePerLiter') {
+    // Auto-calculate prices when liters, price per liter, or payment method changes
+    if (field === 'liters' || field === 'pricePerLiter' || field === 'paymentMethod') {
       if (updatedTransaction.liters > 0 && updatedTransaction.pricePerLiter > 0) {
         updatedTransaction.totalPriceBeforeDiscount = updatedTransaction.liters * updatedTransaction.pricePerLiter;
         
+        // Calculate discount rate based on the updated payment method
+        const discountRate = updatedTransaction.paymentMethod === 'nakit' ? result.oran_nakit : result.oran_kredi;
+        
         updatedTransaction.totalPriceAfterDiscount = calculateDiscountedPrice(
           updatedTransaction.totalPriceBeforeDiscount,
-          result.oran
+          discountRate
         );
       }
     }
@@ -160,15 +173,17 @@ export function TransactionFormDialog({
       }
 
       // First, save the transaction without photo
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const insertData: any = {
         musteri: result.id,
         alis_tip: transaction.gasType,
         alis_litre: transaction.liters,
         alis_tutar: transaction.totalPriceBeforeDiscount,
-        iskonto_oran: result.oran,
+        iskonto_oran: getCurrentDiscountRate(),
         net_tutar: transaction.totalPriceAfterDiscount,
         litre_fiyat: transaction.pricePerLiter,
-        personel: user.sub
+        personel: user.sub,
+        alis_araci: transaction.paymentMethod === 'nakit' ? 'Nakit' : 'Kredi Kartı'
       };
 
       // Add notes if available
@@ -222,6 +237,7 @@ export function TransactionFormDialog({
       // Reset form
       setTransaction({
         gasType: 'Motorin',
+        paymentMethod: 'nakit',
         liters: 0,
         pricePerLiter: 0,
         totalPriceBeforeDiscount: 0,
@@ -245,6 +261,7 @@ export function TransactionFormDialog({
       // Reset form
       setTransaction({
         gasType: 'Motorin',
+        paymentMethod: 'nakit',
         liters: 0,
         pricePerLiter: 0,
         totalPriceBeforeDiscount: 0,
@@ -262,7 +279,7 @@ export function TransactionFormDialog({
         <DialogHeader>
           <DialogTitle className="text-blue-800">Satış İşlemi</DialogTitle>
           <DialogDescription>
-            {result.plaka} plakası için {result.oran}% iskontolu satış
+            {result.plaka} plakası için %{getCurrentDiscountRate()} {transaction.paymentMethod === 'nakit' ? 'nakit' : 'kredi kartı'} iskontolu satış
           </DialogDescription>
         </DialogHeader>
         
@@ -291,6 +308,27 @@ export function TransactionFormDialog({
                 className="flex-1"
               >
                 LPG
+              </Button>
+            </div>
+          </div>
+
+          {/* Payment Method Selection */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">Ödeme Yöntemi</label>
+            <div className="flex gap-2">
+              <Button
+                variant={transaction.paymentMethod === 'nakit' ? 'default' : 'outline'}
+                onClick={() => handleTransactionChange('paymentMethod', 'nakit')}
+                className="flex-1"
+              >
+                💵 Nakit
+              </Button>
+              <Button
+                variant={transaction.paymentMethod === 'kredi' ? 'default' : 'outline'}
+                onClick={() => handleTransactionChange('paymentMethod', 'kredi')}
+                className="flex-1"
+              >
+                💳 Kredi Kartı
               </Button>
             </div>
           </div>
@@ -362,7 +400,7 @@ export function TransactionFormDialog({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-muted-foreground">İndirim Oranı:</span>
-                  <div className="font-semibold">{result.oran}%</div>
+                  <div className="font-semibold">%{getCurrentDiscountRate()} ({transaction.paymentMethod === 'nakit' ? 'Nakit' : 'Kredi Kartı'})</div>
                 </div>
                 <div>
                   <span className="text-muted-foreground">İndirim Tutarı:</span>

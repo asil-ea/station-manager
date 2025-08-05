@@ -5,7 +5,8 @@ import { PlateList } from "./plate-list";
 interface ExistingPlate {
   id: number;
   plaka: string;
-  oran: number;
+  oran_nakit: number;
+  oran_kredi: number;
   aciklama: string | null;
   aktif: boolean;
   created_at: string;

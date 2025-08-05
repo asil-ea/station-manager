@@ -12,7 +12,8 @@ import { createClient } from "@/lib/supabase/client";
 
 interface PlateData {
   plaka: string;
-  oran: number;
+  oran_nakit: number;
+  oran_kredi: number;
   aciklama: string;
   aktif: boolean;
 }
@@ -21,7 +22,8 @@ export function AddPlateDialog() {
   const router = useRouter();
   const [newPlateData, setNewPlateData] = useState<PlateData>({
     plaka: '',
-    oran: 0,
+    oran_nakit: 0,
+    oran_kredi: 0,
     aciklama: '',
     aktif: true
   });
@@ -48,8 +50,12 @@ export function AddPlateDialog() {
         throw new Error("Plaka numarası zorunludur");
       }
       
-      if (newPlateData.oran < 0 || newPlateData.oran > 100) {
-        throw new Error("İskonto oranı 0-100 arasında olmalıdır");
+      if (newPlateData.oran_nakit < 0 || newPlateData.oran_nakit > 100) {
+        throw new Error("Nakit iskonto oranı 0-100 arasında olmalıdır");
+      }
+
+      if (newPlateData.oran_kredi < 0 || newPlateData.oran_kredi > 100) {
+        throw new Error("Kredi kartı iskonto oranı 0-100 arasında olmalıdır");
       }
 
       // Check if plate already exists
@@ -68,7 +74,8 @@ export function AddPlateDialog() {
         .from('iskonto_listesi')
         .insert({
           plaka: newPlateData.plaka.trim(),
-          oran: newPlateData.oran,
+          oran_nakit: newPlateData.oran_nakit,
+          oran_kredi: newPlateData.oran_kredi,
           aciklama: newPlateData.aciklama.trim() || null,
           aktif: newPlateData.aktif
         });
@@ -80,7 +87,8 @@ export function AddPlateDialog() {
       setSuccess("Plaka başarıyla eklendi!");
       setNewPlateData({
         plaka: '',
-        oran: 0,
+        oran_nakit: 0,
+        oran_kredi: 0,
         aciklama: '',
         aktif: true
       });
@@ -130,12 +138,12 @@ export function AddPlateDialog() {
               Yeni Plaka Ekle
             </DialogTitle>
             <DialogDescription>
-              Sisteme yeni bir plaka ekleyin ve iskonto oranını belirleyin.
+              Sisteme yeni bir plaka ekleyin ve nakit ile kredi kartı ödemeler için ayrı iskonto oranları belirleyin.
             </DialogDescription>
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="new-plaka">Plaka Numarası</Label>
                 <Input
@@ -154,18 +162,36 @@ export function AddPlateDialog() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="new-oran">İskonto Oranı (%)</Label>
+                <Label htmlFor="new-oran-nakit">Nakit İskonto Oranı (%)</Label>
                 <Input
-                  id="new-oran"
+                  id="new-oran-nakit"
                   type="number"
                   min="0"
                   max="100"
                   step="0.1"
                   placeholder="ör: 5.5"
-                  value={newPlateData.oran === 0 ? '0' : newPlateData.oran || ''}
+                  value={newPlateData.oran_nakit === 0 ? '0' : newPlateData.oran_nakit || ''}
                   onChange={(e) => setNewPlateData(prev => ({ 
                     ...prev, 
-                    oran: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 
+                    oran_nakit: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 
+                  }))}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new-oran-kredi">Kredi Kartı İskonto Oranı (%)</Label>
+                <Input
+                  id="new-oran-kredi"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  placeholder="ör: 3.0"
+                  value={newPlateData.oran_kredi === 0 ? '0' : newPlateData.oran_kredi || ''}
+                  onChange={(e) => setNewPlateData(prev => ({ 
+                    ...prev, 
+                    oran_kredi: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 
                   }))}
                   required
                 />

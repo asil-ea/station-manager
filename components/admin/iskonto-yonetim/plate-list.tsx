@@ -11,7 +11,8 @@ import { PlateItem } from "./plate-item";
 interface ExistingPlate {
   id: number;
   plaka: string;
-  oran: number;
+  oran_nakit: number;
+  oran_kredi: number;
   aciklama: string | null;
   aktif: boolean;
   created_at: string;
@@ -83,7 +84,7 @@ export function PlateList({ initialPlates }: PlateListProps) {
           Mevcut Plakalar
         </CardTitle>
         <CardDescription>
-          Sistemdeki mevcut plakaları görüntüleyin ve iskonto oranlarını düzenleyin.
+          Sistemdeki mevcut plakaları görüntüleyin ve nakit ile kredi kartı iskonto oranlarını düzenleyin.
         </CardDescription>
       </CardHeader>
       <CardContent>

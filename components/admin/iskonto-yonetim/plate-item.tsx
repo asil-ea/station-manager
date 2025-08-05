@@ -14,7 +14,8 @@ import { createClient } from "@/lib/supabase/client";
 interface ExistingPlate {
   id: number;
   plaka: string;
-  oran: number;
+  oran_nakit: number;
+  oran_kredi: number;
   aciklama: string | null;
   aktif: boolean;
   created_at: string;
@@ -39,15 +40,20 @@ export function PlateItem({ plate }: PlateItemProps) {
 
     try {
       // Validate form
-      if (plateToUpdate.oran < 0 || plateToUpdate.oran > 100) {
-        throw new Error("İskonto oranı 0-100 arasında olmalıdır");
+      if (plateToUpdate.oran_nakit < 0 || plateToUpdate.oran_nakit > 100) {
+        throw new Error("Nakit iskonto oranı 0-100 arasında olmalıdır");
+      }
+
+      if (plateToUpdate.oran_kredi < 0 || plateToUpdate.oran_kredi > 100) {
+        throw new Error("Kredi kartı iskonto oranı 0-100 arasında olmalıdır");
       }
 
       // Update plate
       const { error: updateError } = await supabase
         .from('iskonto_listesi')
         .update({
-          oran: plateToUpdate.oran,
+          oran_nakit: plateToUpdate.oran_nakit,
+          oran_kredi: plateToUpdate.oran_kredi,
           aciklama: plateToUpdate.aciklama?.trim() || null,
           aktif: plateToUpdate.aktif
         })
@@ -103,7 +109,7 @@ export function PlateItem({ plate }: PlateItemProps) {
           {editingPlate?.id === plate.id ? (
             // Edit mode
             <div className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Plaka Numarası</Label>
                   <Input
@@ -113,16 +119,30 @@ export function PlateItem({ plate }: PlateItemProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>İskonto Oranı (%)</Label>
+                  <Label>Nakit İskonto Oranı (%)</Label>
                   <Input
                     type="number"
                     min="0"
                     max="100"
                     step="0.1"
-                    value={editingPlate.oran === 0 ? '0' : editingPlate.oran || ''}
+                    value={editingPlate.oran_nakit === 0 ? '0' : editingPlate.oran_nakit || ''}
                     onChange={(e) => setEditingPlate(prev => prev ? ({ 
                       ...prev, 
-                      oran: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 
+                      oran_nakit: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 
+                    }) : null)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Kredi Kartı İskonto Oranı (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={editingPlate.oran_kredi === 0 ? '0' : editingPlate.oran_kredi || ''}
+                    onChange={(e) => setEditingPlate(prev => prev ? ({ 
+                      ...prev, 
+                      oran_kredi: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 
                     }) : null)}
                   />
                 </div>
@@ -180,7 +200,11 @@ export function PlateItem({ plate }: PlateItemProps) {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Percent className="h-4 w-4" />
-                    %{plate.oran} iskonto
+                    Nakit: %{plate.oran_nakit}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Percent className="h-4 w-4" />
+                    Kredi: %{plate.oran_kredi}
                   </span>
                   <span>Eklenme: {formatDate(plate.created_at)}</span>
                 </div>

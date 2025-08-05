@@ -5,19 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Percent, AlertCircle, CheckCircle, ShoppingCart } from "lucide-react";
+import { Search, AlertCircle, CheckCircle, ShoppingCart, CreditCard, Banknote } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { TransactionFormDialog } from "./transaction-form-dialog";
 
 interface DiscountResult {
   id: number;
   plaka: string;
-  oran: number;
+  oran_nakit: number;
+  oran_kredi: number;
   aciklama: string | null;
   aktif: boolean;
   created_at: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function PlateDiscountSearch({ user }: { user: any }) {
   const [plateNumber, setPlateNumber] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -195,11 +197,28 @@ export function PlateDiscountSearch({ user }: { user: any }) {
                   <div className="text-lg font-semibold">{result.plaka}</div>
                 </div>
                 <div className="text-right">
-                  <div className="flex items-center gap-2 text-3xl font-bold text-green-600">
-                    <Percent className="h-6 w-6" />
-                    {result.oran}
+                  <div className="text-sm text-muted-foreground mb-1">Açıklama</div>
+                  <div className="text-sm max-w-xs text-right">
+                    {result.aciklama || 'Açıklama bulunmuyor'}
                   </div>
-                  <div className="text-sm text-muted-foreground">iskonto oranı</div>
+                </div>
+              </div>
+
+              {/* Discount Rates Comparison */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Banknote className="h-4 w-4 text-green-600" />
+                    <div className="text-sm text-muted-foreground">Nakit Ödeme</div>
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">%{result.oran_nakit}</div>
+                </div>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CreditCard className="h-4 w-4 text-blue-600" />
+                    <div className="text-sm text-muted-foreground">Kredi Kartı</div>
+                  </div>
+                  <div className="text-2xl font-bold text-blue-600">%{result.oran_kredi}</div>
                 </div>
               </div>
 

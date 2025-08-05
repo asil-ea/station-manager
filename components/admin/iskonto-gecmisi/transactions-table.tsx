@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Filter, FileText, Image, Eye } from "lucide-react";
+import { Filter, FileText, Image, Eye, CreditCard, Banknote } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface Transaction {
@@ -22,6 +22,7 @@ interface Transaction {
   aciklama: string | null;
   personel: string;
   fatura_foto: string | null;
+  alis_araci: string;
   iskonto_listesi: {
     plaka: string;
   };
@@ -33,6 +34,7 @@ interface Transaction {
 interface FilterState {
   plaka: string;
   alis_tip: string;
+  alis_araci: string;
   date_from: string;
   date_to: string;
   personel: string;
@@ -50,6 +52,7 @@ export function TransactionsTable() {
   const [filters, setFilters] = useState<FilterState>({
     plaka: '',
     alis_tip: '',
+    alis_araci: '',
     date_from: '',
     date_to: '',
     personel: ''
@@ -124,6 +127,13 @@ export function TransactionsTable() {
       );
     }
 
+    // Filter by payment method
+    if (filters.alis_araci.trim()) {
+      filtered = filtered.filter(t => 
+        t.alis_araci.toLowerCase().includes(filters.alis_araci.toLowerCase())
+      );
+    }
+
     // Filter by personnel (name for now)
     if (filters.personel.trim()) {
       filtered = filtered.filter(t => 
@@ -151,6 +161,7 @@ export function TransactionsTable() {
     setFilters({
       plaka: '',
       alis_tip: '',
+      alis_araci: '',
       date_from: '',
       date_to: '',
       personel: ''
@@ -260,6 +271,16 @@ export function TransactionsTable() {
               </div>
               
               <div>
+                <Label htmlFor="filter-alis-araci">Ödeme Yöntemi</Label>
+                <Input
+                  id="filter-alis-araci"
+                  placeholder="Ödeme yöntemi ara..."
+                  value={filters.alis_araci}
+                  onChange={(e) => setFilters(prev => ({ ...prev, alis_araci: e.target.value }))}
+                />
+              </div>
+              
+              <div>
                 <Label htmlFor="filter-personel">Personel</Label>
                 <Input
                   id="filter-personel"
@@ -330,6 +351,7 @@ export function TransactionsTable() {
                     <th className="text-left p-2">Tarih</th>
                     <th className="text-left p-2">Plaka</th>
                     <th className="text-left p-2">Alış Tipi</th>
+                    <th className="text-left p-2">Ödeme Yöntemi</th>
                     <th className="text-right p-2">Litre</th>
                     <th className="text-right p-2">Litre Fiyatı</th>
                     <th className="text-right p-2">Toplam Tutar</th>
@@ -353,6 +375,21 @@ export function TransactionsTable() {
                       <td className="p-2">
                         <Badge variant="secondary">
                           {transaction.alis_tip}
+                        </Badge>
+                      </td>
+                      <td className="p-2">
+                        <Badge 
+                          variant={transaction.alis_araci === 'Nakit' ? 'default' : 'outline'}
+                          className={transaction.alis_araci === 'Nakit' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-blue-100 text-blue-800 border-blue-300'}
+                        >
+                          <div className="flex items-center gap-1">
+                            {transaction.alis_araci === 'Nakit' ? (
+                              <Banknote className="h-3 w-3" />
+                            ) : (
+                              <CreditCard className="h-3 w-3" />
+                            )}
+                            {transaction.alis_araci || 'N/A'}
+                          </div>
                         </Badge>
                       </td>
                       <td className="p-2 text-right font-mono">
