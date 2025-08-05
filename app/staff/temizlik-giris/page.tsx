@@ -5,21 +5,19 @@ import { CleaningEntryForm } from "@/components/staff/temizlik-giris/cleaning-en
 
 export default async function CleaningEntryPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims;
 
-  if (error || !user) {
+  // Redirect if not authenticated
+  if (!user) {
     redirect("/auth/login");
   }
-
   // Fetch user details and available cleaning operations
   const [userDetailsResult, operationsResult] = await Promise.all([
     supabase
       .from("user_details")
       .select("name")
-      .eq("uid", user.id)
+      .eq("uid", user.sub)
       .single(),
     supabase
       .from("temizlik_islem")
@@ -49,7 +47,7 @@ export default async function CleaningEntryPage() {
 
             <CleaningEntryForm 
               operations={operationsResult.data || []} 
-              userId={user.id} 
+              userId={user.sub} 
               userName={userDetailsResult.data?.name}
             />
           </div>

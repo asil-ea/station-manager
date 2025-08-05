@@ -28,6 +28,7 @@ interface TransactionData {
 }
 
 interface TransactionFormDialogProps {
+  user: any; // User object from Supabase
   isOpen: boolean;
   onClose: () => void;
   result: DiscountResult;
@@ -36,12 +37,14 @@ interface TransactionFormDialogProps {
 }
 
 export function TransactionFormDialog({ 
+  user,
   isOpen, 
   onClose, 
   result, 
   onSuccess,
   onError 
 }: TransactionFormDialogProps) {
+  const supabase = createClient();
   const [transaction, setTransaction] = useState<TransactionData>({
     gasType: 'Motorin',
     liters: 0,
@@ -54,8 +57,6 @@ export function TransactionFormDialog({
   });
   const [isSubmittingTransaction, setIsSubmittingTransaction] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-
-  const supabase = createClient();
 
   const calculateDiscountedPrice = (originalPrice: number, discountRate: number) => {
     return originalPrice * (1 - discountRate / 100);
@@ -153,10 +154,7 @@ export function TransactionFormDialog({
     setIsSubmittingTransaction(true);
 
     try {
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
+      if (!user) {
         onError("Kullanıcı bilgisi alınamadı. Lütfen tekrar giriş yapın.");
         return;
       }
@@ -170,7 +168,7 @@ export function TransactionFormDialog({
         iskonto_oran: result.oran,
         net_tutar: transaction.totalPriceAfterDiscount,
         litre_fiyat: transaction.pricePerLiter,
-        personel: user.id
+        personel: user.sub
       };
 
       // Add notes if available

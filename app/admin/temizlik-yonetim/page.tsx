@@ -5,12 +5,11 @@ import { CleaningLogsTable } from "@/components/admin/temizlik-yonetim/cleaning-
 
 export default async function CleaningManagementPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims;
 
-  if (error || !user) {
+  // Redirect if not authenticated
+  if (!user) {
     redirect("/auth/login");
   }
 
@@ -18,7 +17,7 @@ export default async function CleaningManagementPage() {
   const { data: userDetails } = await supabase
     .from("user_details")
     .select("role, name")
-    .eq("uid", user.id)
+    .eq("uid", user.sub)
     .single();
 
   if (userDetails?.role !== "admin") {

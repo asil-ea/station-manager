@@ -40,7 +40,7 @@ export default async function IskontoListesi() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <PlateDiscountSearch />
+              <PlateDiscountSearch user={user} />
             </CardContent>
           </Card>
         </div>

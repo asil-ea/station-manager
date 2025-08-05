@@ -23,9 +23,11 @@ export async function AuthenticatedLayout({
   requireAdmin = false
 }: AuthenticatedLayoutProps) {
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims;
 
-  if (error || !user) {
+  // Redirect if not authenticated
+  if (!user) {
     redirect("/auth/login");
   }
 
@@ -33,7 +35,7 @@ export async function AuthenticatedLayout({
   const { data: userDetails } = await supabase
     .from('user_details')
     .select('role, name')
-    .eq('uid', user.id)
+    .eq('uid', user.sub)
     .single();
 
   // Check user role if admin is required

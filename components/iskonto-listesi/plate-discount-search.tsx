@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Percent, AlertCircle, CheckCircle, ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +18,7 @@ interface DiscountResult {
   created_at: string;
 }
 
-export function PlateDiscountSearch() {
+export function PlateDiscountSearch({ user }: { user: any }) {
   const [plateNumber, setPlateNumber] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [result, setResult] = useState<DiscountResult | null>(null);
@@ -253,6 +253,7 @@ export function PlateDiscountSearch() {
       {/* Transaction Form Dialog */}
       {result && (
         <TransactionFormDialog
+          user={user}
           isOpen={showTransactionDialog}
           onClose={() => setShowTransactionDialog(false)}
           result={result}

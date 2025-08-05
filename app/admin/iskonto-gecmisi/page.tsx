@@ -6,9 +6,10 @@ import { TransactionsTable } from "@/components/admin/iskonto-gecmisi/transactio
 
 export default async function TransactionsPage() {
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims;
 
-  if (error || !user) {
+  if (!user) {
     redirect("/auth/login");
   }
 
@@ -16,7 +17,7 @@ export default async function TransactionsPage() {
   const { data: userDetails } = await supabase
     .from('user_details')
     .select('role, name')
-    .eq('uid', user.id)
+    .eq('uid', user.sub)
     .single();
 
   if (userDetails?.role !== 'admin') {
