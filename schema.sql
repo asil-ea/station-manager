@@ -32,7 +32,6 @@ CREATE TABLE public.temizlik_gunluk (
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   personel uuid NOT NULL,
   timestamp timestamp with time zone NOT NULL,
-  temizlik_fotolar ARRAY,
   aciklama text,
   CONSTRAINT temizlik_gunluk_pkey PRIMARY KEY (id),
   CONSTRAINT temizlik_gunluk_personel_fkey FOREIGN KEY (personel) REFERENCES auth.users(id)

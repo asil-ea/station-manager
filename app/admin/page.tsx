@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, BarChart3, Shield, Car, Receipt, UserPlus } from "lucide-react";
+import { Users, BarChart3, Shield, Car, Receipt, UserPlus, Sparkles } from "lucide-react";
 import { ResponsiveHeader } from "@/components/common/responsive-header";
 
 export default async function AdminPage() {
@@ -116,7 +116,7 @@ export default async function AdminPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Link href="/admin/iskonto-yonetim">
                   <Button
                     variant="outline"
@@ -134,6 +134,16 @@ export default async function AdminPage() {
                   >
                     <Receipt className="h-5 w-5 sm:h-6 sm:w-6" />
                     <span className="text-sm sm:text-base">İskontolu İşlem Geçmişi</span>
+                  </Button>
+                </Link>
+
+                <Link href="/admin/temizlik-yonetim">
+                  <Button
+                    variant="outline"
+                    className="h-16 sm:h-20 flex flex-col gap-2 w-full"
+                  >
+                    <Sparkles className="h-5 w-5 sm:h-6 sm:w-6" />
+                    <span className="text-sm sm:text-base">Temizlik Yönetimi</span>
                   </Button>
                 </Link>
 
