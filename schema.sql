@@ -14,17 +14,19 @@ CREATE TABLE public.iskonto_alisveris (
   personel uuid NOT NULL,
   aciklama text,
   fatura_foto text,
+  alis_araci text, -- Payment method
   CONSTRAINT iskonto_alisveris_pkey PRIMARY KEY (id),
-  CONSTRAINT iskonto_alisveris_musteri_fkey FOREIGN KEY (musteri) REFERENCES public.iskonto_listesi(id),
-  CONSTRAINT iskonto_alisveris_personel_fkey FOREIGN KEY (personel) REFERENCES auth.users(id)
+  CONSTRAINT iskonto_alisveris_personel_fkey FOREIGN KEY (personel) REFERENCES auth.users(id),
+  CONSTRAINT iskonto_alisveris_musteri_fkey FOREIGN KEY (musteri) REFERENCES public.iskonto_listesi(id)
 );
 CREATE TABLE public.iskonto_listesi (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   plaka text NOT NULL,
-  oran double precision NOT NULL,
+  oran_nakit double precision NOT NULL,
   aciklama text,
   aktif boolean NOT NULL DEFAULT true,
+  oran_kredi bigint,
   CONSTRAINT iskonto_listesi_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.temizlik_gunluk (
