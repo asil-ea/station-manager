@@ -6,21 +6,34 @@ import { TransactionsTable } from "@/components/admin/iskonto-gecmisi/transactio
 
 export default async function TransactionsPage() {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+
+  // Parallelize Supabase queries
+  const [
+    { data: claimsData, error: claimsError },
+    { data: userDetails, error: userDetailsError },
+  ] = await Promise.all([
+    supabase.auth.getClaims(),
+    supabase.from("user_details").select("role, name").single(),
+  ]);
+
+  if (claimsError) {
+    console.error("Error fetching claims:", claimsError);
+    // Redirect or handle error as appropriate
+    redirect("/auth/login");
+  }
+
+  const user = claimsData?.claims;
 
   if (!user) {
     redirect("/auth/login");
   }
 
-  // Check if user is admin and get user details
-  const { data: userDetails } = await supabase
-    .from('user_details')
-    .select('role, name')
-    .eq('uid', user.sub)
-    .single();
+  if (userDetailsError) {
+    console.error("Error fetching user details:", userDetailsError);
+    // Handle error appropriately, maybe show a generic error message
+  }
 
-  if (userDetails?.role !== 'admin') {
+  if (userDetails?.role !== "admin") {
     redirect("/staff");
   }
 

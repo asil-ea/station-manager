@@ -5,34 +5,39 @@ import { CleaningEntryForm } from "@/components/staff/temizlik-giris/cleaning-en
 
 export default async function CleaningEntryPage() {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
 
-  // Redirect if not authenticated
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     redirect("/auth/login");
   }
-  // Fetch user details and available cleaning operations
+
+  // Fetch user details and available cleaning operations in parallel
   const [userDetailsResult, operationsResult] = await Promise.all([
-    supabase
-      .from("user_details")
-      .select("name")
-      .eq("uid", user.sub)
-      .single(),
-    supabase
-      .from("temizlik_islem")
-      .select("*")
-      .order("islem")
+    supabase.from("user_details").select("name").eq("uid", user.id).single(),
+    supabase.from("temizlik_islem").select("*").order("islem"),
   ]);
+
+  const { data: userDetails, error: userDetailsError } = userDetailsResult;
+  const { data: operations, error: operationsError } = operationsResult;
+
+  if (userDetailsError) {
+    console.error("Error fetching user details:", userDetailsError);
+  }
+  if (operationsError) {
+    console.error("Error fetching cleaning operations:", operationsError);
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <ResponsiveHeader 
+      <ResponsiveHeader
         title="Temizlik Girişi"
         backHref="/staff"
         backText="Geri Dön"
-        userEmail={user.email} 
-        userName={userDetailsResult.data?.name}
+        userEmail={user.email}
+        userName={userDetails?.name}
       />
 
       <main className="flex-1 max-w-4xl mx-auto w-full p-4 sm:p-6">
@@ -45,10 +50,10 @@ export default async function CleaningEntryPage() {
               Günlük temizlik faaliyetlerinizi kaydedin.
             </p>
 
-            <CleaningEntryForm 
-              operations={operationsResult.data || []} 
-              userId={user.sub} 
-              userName={userDetailsResult.data?.name}
+            <CleaningEntryForm
+              operations={operations || []}
+              userId={user.id}
+              userName={userDetails?.name}
             />
           </div>
         </div>

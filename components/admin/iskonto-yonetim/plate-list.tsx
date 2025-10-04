@@ -113,7 +113,7 @@ export function PlateList({ initialPlates }: PlateListProps) {
     if (searchTerm.trim()) {
       filtered = filtered.filter(plate => 
         plate.plaka.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        plate.aciklama?.toLowerCase().includes(searchTerm.toLowerCase())
+        (plate.aciklama && plate.aciklama.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 

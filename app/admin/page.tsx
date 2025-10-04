@@ -14,35 +14,36 @@ import { ResponsiveHeader } from "@/components/common/responsive-header";
 
 export default async function AdminPage() {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims()
-  const user = data?.claims;
 
-  // Redirect if not authenticated
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     redirect("/auth/login");
   }
 
-  // Check if user is admin and get user details
-  const { data: userDetails } = await supabase
-    .from("user_details")
-    .select("role, name")
-    .eq("uid", user.sub)
-    .single();
+  const [
+    { data: userDetails, error: userDetailsError },
+    { count: userCount, error: userCountError },
+    { count: adminCount, error: adminCountError },
+  ] = await Promise.all([
+    supabase.from("user_details").select("role, name").eq("uid", user.id).single(),
+    supabase.from("user_details").select("*", { count: "exact", head: true }),
+    supabase
+      .from("user_details")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "admin"),
+  ]);
+
+  if (userDetailsError || userCountError || adminCountError) {
+    console.error({ userDetailsError, userCountError, adminCountError });
+    // Optionally, handle the error more gracefully
+  }
 
   if (userDetails?.role !== "admin") {
     redirect("/staff");
   }
-
-  // Get user count
-  const { count: userCount } = await supabase
-    .from("user_details")
-    .select("*", { count: "exact", head: true });
-
-  // Get admin count
-  const { count: adminCount } = await supabase
-    .from("user_details")
-    .select("*", { count: "exact", head: true })
-    .eq("role", "admin");
 
   return (
     <>

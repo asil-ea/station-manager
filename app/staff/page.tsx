@@ -7,20 +7,25 @@ import { BrushCleaning, Car, Shield } from "lucide-react";
 
 export default async function Dashboard() {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
 
-  // Redirect if not authenticated
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     redirect("/auth/login");
   }
-  
-  // Check user role and get user details
-  const { data: userDetails } = await supabase
+
+  const { data: userDetails, error } = await supabase
     .from("user_details")
     .select("role, name")
-    .eq("uid", user.sub)
+    .eq("uid", user.id)
     .single();
+
+  if (error) {
+    console.error("Error fetching user details:", error);
+    // Handle error appropriately
+  }
 
   const isAdmin = userDetails?.role === "admin";
 
@@ -85,6 +90,16 @@ export default async function Dashboard() {
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     İndirimli alışveriş girişi yapın.
+                  </p>
+                </div>
+              </Link>
+              <Link href="/staff/vardiya-devir" className="block">
+                <div className="bg-/10 p-4 rounded-md border border-primary/20 hover:bg-primary/20 transition-colors">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    Vardiya Devir
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Vardiya başlangıcı ve çıkış kontrol onayı.
                   </p>
                 </div>
               </Link>

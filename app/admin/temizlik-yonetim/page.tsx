@@ -5,20 +5,26 @@ import { CleaningLogsTable } from "@/components/admin/temizlik-yonetim/cleaning-
 
 export default async function CleaningManagementPage() {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  // Parallelize Supabase queries
+  const [
+    { data: claimsData },
+    { data: userDetails, error: userDetailsError },
+  ] = await Promise.all([
+    supabase.auth.getClaims(),
+    supabase.from("user_details").select("role, name").single(),
+  ]);
+
+  const user = claimsData?.claims;
 
   // Redirect if not authenticated
   if (!user) {
     redirect("/auth/login");
   }
 
-  // Check if user is admin
-  const { data: userDetails } = await supabase
-    .from("user_details")
-    .select("role, name")
-    .eq("uid", user.sub)
-    .single();
+  if (userDetailsError) {
+    console.error("Error fetching user details:", userDetailsError);
+    // Handle error appropriately
+  }
 
   if (userDetails?.role !== "admin") {
     redirect("/staff");
@@ -27,7 +33,8 @@ export default async function CleaningManagementPage() {
   // Fetch cleaning logs with user details and operations
   const { data: cleaningLogs, error: logsError } = await supabase
     .from("temizlik_gunluk")
-    .select(`
+    .select(
+      `
       id,
       timestamp,
       aciklama,
@@ -42,7 +49,8 @@ export default async function CleaningManagementPage() {
         id,
         foto
       )
-    `)
+    `
+    )
     .order("timestamp", { ascending: false });
 
   // Get user details for each cleaning log
@@ -51,7 +59,7 @@ export default async function CleaningManagementPage() {
   if (cleaningLogs) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userIds = [...new Set(cleaningLogs.map((log: any) => log.personel))];
-    const { data: userDetails } = await supabase
+    const { data: userDetailsMap } = await supabase
       .from("user_details")
       .select("uid, name")
       .in("uid", userIds);
@@ -61,8 +69,10 @@ export default async function CleaningManagementPage() {
       ...log,
       user_details: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        name: userDetails?.find((user: any) => user.uid === log.personel)?.name || "Bilinmeyen"
-      }
+        name:
+          userDetailsMap?.find((user: any) => user.uid === log.personel)
+            ?.name || "Bilinmeyen",
+      },
     }));
   }
 
