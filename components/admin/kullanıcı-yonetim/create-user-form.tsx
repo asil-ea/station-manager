@@ -139,9 +139,6 @@ export function CreateUserForm() {
               <strong>E-posta:</strong> {formData.email}
             </p>
             <p>
-              <strong>Şifre:</strong> {formData.password}
-            </p>
-            <p>
               <strong>Rol:</strong> {formData.role}
             </p>
           </div>
