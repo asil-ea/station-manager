@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AddPlateDialog } from "./add-plate-dialog";
 import { PlateList } from "./plate-list";
+import { PlateRequests } from "./plate-requests";
 
 interface ExistingPlate {
   id: number;
@@ -38,6 +39,7 @@ export async function PlateManagement() {
 
   return (
     <div className="space-y-6">
+      <PlateRequests />
       <AddPlateDialog />
       <PlateList initialPlates={initialPlates} />
     </div>

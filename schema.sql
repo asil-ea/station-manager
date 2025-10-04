@@ -29,6 +29,25 @@ CREATE TABLE public.iskonto_listesi (
   oran_kredi bigint,
   CONSTRAINT iskonto_listesi_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.iskonto_plaka_talepleri (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  plaka text NOT NULL,
+  aciklama text,
+  durum text NOT NULL DEFAULT 'pending',
+  requested_by uuid NOT NULL,
+  requested_by_email text,
+  requested_by_name text,
+  processed_at timestamp with time zone,
+  processed_by uuid,
+  processed_by_name text,
+  oran_nakit double precision,
+  oran_kredi double precision,
+  onaylanan_plaka_id bigint,
+  reddetme_notu text,
+  CONSTRAINT iskonto_plaka_talepleri_pkey PRIMARY KEY (id),
+  CONSTRAINT iskonto_plaka_talepleri_onaylanan_plaka_id_fkey FOREIGN KEY (onaylanan_plaka_id) REFERENCES public.iskonto_listesi(id)
+);
 CREATE TABLE public.temizlik_gunluk (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
