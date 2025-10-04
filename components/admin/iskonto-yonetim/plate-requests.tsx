@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -90,9 +90,15 @@ export function PlateRequests() {
     }
   }, [supabase]);
 
-  const loadRequests = useCallback(async () => {
+  const loadRequests = useCallback(async (options?: { showSpinner?: boolean }) => {
+    const showSpinner = options?.showSpinner ?? true;
     try {
       setError(null);
+      if (showSpinner) {
+        setIsLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
       const { data, error: supabaseError } = await supabase
         .from('iskonto_plaka_talepleri')
         .select('*')
@@ -103,7 +109,12 @@ export function PlateRequests() {
         throw supabaseError;
       }
 
-      setRequests((data as PlateRequest[]) ?? []);
+      setRequests(
+        (data as PlateRequest[] | null)?.map((request) => ({
+          ...request,
+          durum: (request.durum as PlateRequest['durum']) ?? 'pending',
+        })) ?? []
+      );
     } catch (err) {
       console.error('Failed to load plate requests', err);
       setError('Plaka talepleri yüklenirken bir hata oluştu.');
@@ -146,8 +157,7 @@ export function PlateRequests() {
   };
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await loadRequests();
+    await loadRequests({ showSpinner: false });
   };
 
   const resetApprovalState = () => {
@@ -237,6 +247,25 @@ export function PlateRequests() {
         throw updateError;
       }
 
+      setRequests((prev) =>
+        prev.map((request) =>
+          request.id === approvalTarget.id
+            ? {
+                ...request,
+                durum: 'approved',
+                processed_at: processedAt,
+                processed_by: currentUser?.id ?? null,
+                processed_by_name: currentUser?.name ?? null,
+                oran_nakit: cashRate,
+                oran_kredi: cardRate,
+                onaylanan_plaka_id: insertedPlate?.id ?? null,
+                reddetme_notu: null,
+                aciklama: approvalDraft.aciklama.trim() || request.aciklama,
+              }
+            : request
+        )
+      );
+
       setSuccessMessage(`${approvalTarget.plaka} plakası için iskonto başarıyla tanımlandı.`);
       resetApprovalState();
       await loadRequests();
@@ -279,6 +308,21 @@ export function PlateRequests() {
       if (updateError) {
         throw updateError;
       }
+
+      setRequests((prev) =>
+        prev.map((request) =>
+          request.id === rejectTarget.id
+            ? {
+                ...request,
+                durum: 'rejected',
+                processed_at: processedAt,
+                processed_by: currentUser?.id ?? null,
+                processed_by_name: currentUser?.name ?? null,
+                reddetme_notu: rejectReason.trim(),
+              }
+            : request
+        )
+      );
 
       setSuccessMessage(`${rejectTarget.plaka} plakası için talep reddedildi.`);
       setRejectTarget(null);
@@ -459,7 +503,7 @@ export function PlateRequests() {
                     max="100"
                     step="0.1"
                     value={approvalDraft.oran_nakit}
-                    onChange={(event) =>
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
                       setApprovalDraft((prev) => ({
                         ...prev,
                         oran_nakit: event.target.value,
@@ -477,7 +521,7 @@ export function PlateRequests() {
                     max="100"
                     step="0.1"
                     value={approvalDraft.oran_kredi}
-                    onChange={(event) =>
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
                       setApprovalDraft((prev) => ({
                         ...prev,
                         oran_kredi: event.target.value,
@@ -493,7 +537,7 @@ export function PlateRequests() {
                     rows={3}
                     className="h-full w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     value={approvalDraft.aciklama}
-                    onChange={(event) =>
+                    onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
                       setApprovalDraft((prev) => ({
                         ...prev,
                         aciklama: event.target.value,
@@ -607,7 +651,7 @@ export function PlateRequests() {
               rows={4}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               value={rejectReason}
-              onChange={(event) => setRejectReason(event.target.value)}
+              onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setRejectReason(event.target.value)}
               placeholder="Talebi neden reddettiğinizi açıklayın."
               disabled={isProcessing}
             />
