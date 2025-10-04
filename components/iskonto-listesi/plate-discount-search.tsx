@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, AlertCircle, CheckCircle, ShoppingCart, CreditCard, Banknote } from "lucide-react";
+import { Search, AlertCircle, CheckCircle, ShoppingCart, CreditCard, Banknote, PlusCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { TransactionFormDialog } from "./transaction-form-dialog";
+import { RequestPlateDialog } from "./request-plate-dialog";
 
 interface DiscountResult {
   id: number;
@@ -26,6 +27,8 @@ export function PlateDiscountSearch({ user }: { user: any }) {
   const [result, setResult] = useState<DiscountResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+  const [requestSuccessMessage, setRequestSuccessMessage] = useState<string | null>(null);
   
   // Transaction dialog states
   const [showTransactionDialog, setShowTransactionDialog] = useState(false);
@@ -43,6 +46,7 @@ export function PlateDiscountSearch({ user }: { user: any }) {
     setError(null);
     setResult(null);
     setHasSearched(false);
+  setRequestSuccessMessage(null);
 
     try {
       const { data, error: supabaseError } = await supabase
@@ -160,6 +164,19 @@ export function PlateDiscountSearch({ user }: { user: any }) {
         </Card>
       )}
 
+      {/* Plate Request Success */}
+      {requestSuccessMessage && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="pt-6">
+            <div className="text-center py-4">
+              <CheckCircle className="h-12 w-12 mx-auto text-blue-600 mb-4" />
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">Talebiniz Alındı</h3>
+              <p className="text-blue-700">{requestSuccessMessage}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* No Result Found */}
       {hasSearched && !result && !error && (
         <Card className="border-muted">
@@ -170,6 +187,16 @@ export function PlateDiscountSearch({ user }: { user: any }) {
               <p className="text-muted-foreground">
                 <strong>{plateNumber}</strong> plakası için aktif bir iskonto kaydı bulunamadı.
               </p>
+              <div className="mt-6 flex justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setRequestDialogOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  İskonto Talebi Gönder
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -222,13 +249,6 @@ export function PlateDiscountSearch({ user }: { user: any }) {
                 </div>
               </div>
 
-              {result.aciklama && (
-                <div className="p-4 bg-white rounded-lg border">
-                  <div className="text-sm text-muted-foreground mb-1">Açıklama</div>
-                  <div className="text-sm">{result.aciklama}</div>
-                </div>
-              )}
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-white rounded-lg border">
                   <div className="text-sm text-muted-foreground mb-1">Durum</div>
@@ -280,6 +300,15 @@ export function PlateDiscountSearch({ user }: { user: any }) {
           onError={handleTransactionError}
         />
       )}
+
+      <RequestPlateDialog
+        open={requestDialogOpen}
+        onOpenChange={setRequestDialogOpen}
+        plateNumber={plateNumber}
+        user={user}
+        onSuccess={setRequestSuccessMessage}
+        onError={setError}
+      />
     </div>
   );
 }
