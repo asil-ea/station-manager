@@ -164,6 +164,11 @@ export function TransactionFormDialog({
       return;
     }
 
+    if (!transaction.receiptPhoto) {
+      onError("Lütfen fiş fotoğrafını yükleyin.");
+      return;
+    }
+
     setIsSubmittingTransaction(true);
 
     try {
@@ -414,7 +419,7 @@ export function TransactionFormDialog({
 
           {/* Receipt Photo Upload */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Fiş Fotoğrafı (İsteğe Bağlı)</label>
+            <label className="text-sm font-medium mb-2 block">Fiş Fotoğrafı <span className="text-red-600">*</span></label>
             <div className="space-y-2">
               <div className="relative">
                 <Input
@@ -423,6 +428,7 @@ export function TransactionFormDialog({
                   onChange={handleFileChange}
                   disabled={isUploadingPhoto}
                   className="cursor-pointer"
+                  required
                 />
                 {isUploadingPhoto && (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -463,7 +469,7 @@ export function TransactionFormDialog({
               )}
               
               <p className="text-xs text-muted-foreground">
-                JPG, PNG veya WebP formatında, maksimum 10MB. Fotoğraf işlem kaydedildiğinde yüklenecek.
+                JPG, PNG veya WebP formatında, maksimum 10MB. Fotoğraf yüklenmeden işlem tamamlanamaz.
               </p>
             </div>
           </div>
@@ -499,7 +505,12 @@ export function TransactionFormDialog({
             <Button
               onClick={handleSubmitTransaction}
               className="flex-1"
-              disabled={isSubmittingTransaction || transaction.liters <= 0 || transaction.pricePerLiter <= 0}
+              disabled={
+                isSubmittingTransaction ||
+                transaction.liters <= 0 ||
+                transaction.pricePerLiter <= 0 ||
+                !transaction.receiptPhoto
+              }
             >
               {isSubmittingTransaction ? (
                 <div className="flex items-center gap-2">

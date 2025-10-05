@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Filter, FileText, Image, Eye, CreditCard, Banknote } from "lucide-react";
+import { Filter, FileText, Image as ImageIcon, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Transaction {
   id: number;
@@ -25,6 +26,7 @@ interface Transaction {
   alis_araci: string;
   iskonto_listesi: {
     plaka: string;
+    aciklama: string | null;
   };
   user_details: {
     name: string;
@@ -33,6 +35,7 @@ interface Transaction {
 
 interface FilterState {
   plaka: string;
+  plaka_aciklama: string;
   alis_tip: string;
   alis_araci: string;
   date_from: string;
@@ -51,6 +54,7 @@ export function TransactionsTable() {
   
   const [filters, setFilters] = useState<FilterState>({
     plaka: '',
+    plaka_aciklama: '',
     alis_tip: '',
     alis_araci: '',
     date_from: '',
@@ -70,7 +74,8 @@ export function TransactionsTable() {
         .select(`
           *,
           iskonto_listesi!musteri (
-            plaka
+            plaka,
+            aciklama
           )
         `)
         .order('created_at', { ascending: false });
@@ -120,6 +125,13 @@ export function TransactionsTable() {
       );
     }
 
+    if (filters.plaka_aciklama.trim()) {
+      const searchTerm = filters.plaka_aciklama.toLowerCase();
+      filtered = filtered.filter(t => 
+        (t.iskonto_listesi?.aciklama || '').toLowerCase().includes(searchTerm)
+      );
+    }
+
     // Filter by transaction type
     if (filters.alis_tip.trim()) {
       filtered = filtered.filter(t => 
@@ -160,6 +172,7 @@ export function TransactionsTable() {
   const clearFilters = () => {
     setFilters({
       plaka: '',
+      plaka_aciklama: '',
       alis_tip: '',
       alis_araci: '',
       date_from: '',
@@ -202,6 +215,20 @@ export function TransactionsTable() {
   useEffect(() => {
     applyFilters();
   }, [filters, transactions]);
+
+  const totalLiters = useMemo(
+    () => filteredTransactions.reduce((sum, transaction) => sum + transaction.alis_litre, 0),
+    [filteredTransactions]
+  );
+
+  const totalDiscount = useMemo(
+    () =>
+      filteredTransactions.reduce(
+        (sum, transaction) => sum + (transaction.alis_tutar - transaction.net_tutar),
+        0
+      ),
+    [filteredTransactions]
+  );
 
   if (loading) {
     return (
@@ -257,6 +284,16 @@ export function TransactionsTable() {
                   placeholder="Plaka ara..."
                   value={filters.plaka}
                   onChange={(e) => setFilters(prev => ({ ...prev, plaka: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="filter-plaka-description">Plaka Açıklaması</Label>
+                <Input
+                  id="filter-plaka-description"
+                  placeholder="Plaka açıklaması ara..."
+                  value={filters.plaka_aciklama}
+                  onChange={(e) => setFilters(prev => ({ ...prev, plaka_aciklama: e.target.value }))}
                 />
               </div>
               
@@ -351,12 +388,12 @@ export function TransactionsTable() {
                     <th className="text-left p-2">Tarih</th>
                     <th className="text-left p-2">Plaka</th>
                     <th className="text-left p-2">Alış Tipi</th>
-                    <th className="text-left p-2">Ödeme Yöntemi</th>
                     <th className="text-right p-2">Litre</th>
                     <th className="text-right p-2">Litre Fiyatı</th>
                     <th className="text-right p-2">Toplam Tutar</th>
+                    <th className="text-right p-2">Toplam İndirim</th>
                     <th className="text-right p-2">İskonto %</th>
-                    <th className="text-right p-2">Net Tutar</th>
+                    <th className="text-left p-2">Açıklama</th>
                     <th className="text-left p-2">Personel</th>
                     <th className="text-center p-2">Fatura</th>
                   </tr>
@@ -368,28 +405,26 @@ export function TransactionsTable() {
                         {formatDate(transaction.created_at)}
                       </td>
                       <td className="p-2">
-                        <Badge variant="outline" className="font-mono">
-                          {transaction.iskonto_listesi?.plaka || 'N/A'}
-                        </Badge>
+                        {transaction.iskonto_listesi?.aciklama?.trim() ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="outline" className="font-mono">
+                                {transaction.iskonto_listesi?.plaka || 'N/A'}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {transaction.iskonto_listesi.aciklama}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <Badge variant="outline" className="font-mono">
+                            {transaction.iskonto_listesi?.plaka || 'N/A'}
+                          </Badge>
+                        )}
                       </td>
                       <td className="p-2">
                         <Badge variant="secondary">
                           {transaction.alis_tip}
-                        </Badge>
-                      </td>
-                      <td className="p-2">
-                        <Badge 
-                          variant={transaction.alis_araci === 'Nakit' ? 'default' : 'outline'}
-                          className={transaction.alis_araci === 'Nakit' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-blue-100 text-blue-800 border-blue-300'}
-                        >
-                          <div className="flex items-center gap-1">
-                            {transaction.alis_araci === 'Nakit' ? (
-                              <Banknote className="h-3 w-3" />
-                            ) : (
-                              <CreditCard className="h-3 w-3" />
-                            )}
-                            {transaction.alis_araci || 'N/A'}
-                          </div>
                         </Badge>
                       </td>
                       <td className="p-2 text-right font-mono">
@@ -401,13 +436,16 @@ export function TransactionsTable() {
                       <td className="p-2 text-right font-mono">
                         {formatCurrency(transaction.alis_tutar)}
                       </td>
+                      <td className="p-2 text-right font-mono">
+                        {formatCurrency(transaction.alis_tutar - transaction.net_tutar)}
+                      </td>
                       <td className="p-2 text-right">
                         <Badge variant="destructive">
                           %{transaction.iskonto_oran}
                         </Badge>
                       </td>
-                      <td className="p-2 text-right font-mono font-semibold">
-                        {formatCurrency(transaction.net_tutar)}
+                      <td className="p-2 text-sm">
+                        {transaction.aciklama?.trim() ? transaction.aciklama : '−'}
                       </td>
                       <td className="p-2 text-sm">
                         {transaction.user_details?.name || 'N/A'}
@@ -430,6 +468,25 @@ export function TransactionsTable() {
                     </tr>
                   ))}
                 </tbody>
+                <tfoot>
+                  <tr className="border-t bg-muted/30">
+                    <td className="p-2 text-sm font-medium" colSpan={3}>
+                      Toplam
+                    </td>
+                    <td className="p-2 text-right font-mono font-semibold">
+                      {totalLiters.toFixed(2)} L
+                    </td>
+                    <td className="p-2" />
+                    <td className="p-2" />
+                    <td className="p-2 text-right font-mono font-semibold">
+                      {formatCurrency(totalDiscount)}
+                    </td>
+                    <td className="p-2" />
+                    <td className="p-2" />
+                    <td className="p-2" />
+                    <td className="p-2" />
+                  </tr>
+                </tfoot>
               </table>
             </div>
           )}
@@ -441,13 +498,14 @@ export function TransactionsTable() {
         <DialogContent className="max-w-4xl max-h-[90vh] p-0">
           <DialogHeader className="p-6 pb-2">
             <DialogTitle className="flex items-center gap-2">
-              <Image className="h-5 w-5" />
+              <ImageIcon className="h-5 w-5" />
               Fatura Görüntüsü
             </DialogTitle>
           </DialogHeader>
           <div className="px-6 pb-6">
             {selectedImage && (
               <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={selectedImage}
                   alt="Fatura"
